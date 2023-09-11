@@ -27,4 +27,10 @@ setup(
     url="https://github.com/1ucky40nc3/prollm-translator",
     package_dir={"": "src"},
     packages=find_packages("src"),
+    entry_points={
+        "console_scripts": [
+            "gradio-chat=gradio_chat.app:main",
+            "prollm-translator=prollm_translator.main:main"
+        ]
+    },
 )
