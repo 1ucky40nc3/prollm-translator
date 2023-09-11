@@ -14,8 +14,6 @@
 
 from typing import (
     Any,
-    List,
-    Dict,
     Type,
     Optional
 )
@@ -28,7 +26,7 @@ from dataclasses import dataclass, asdict
 
 from haikunator import Haikunator
 
-from frontend.models import (
+from gradio_chat.models import (
     Setting, 
     Frontend,
     Chat,
@@ -43,7 +41,7 @@ def haikunate() -> str:
     return Haikunator().haikunate()
 
 
-def load_json(path: str) -> Dict[str, Any]:
+def load_json(path: str) -> dict[str, Any]:
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
@@ -54,7 +52,7 @@ def load_setting(path: str) -> Setting:
     return Setting(**data)
     
 
-def load_settings(path: str) -> List[Setting]:
+def load_settings(path: str) -> list[Setting]:
     pattern = os.path.join(path, "**", "*.json")
     paths = glob.glob(pattern, recursive=True)
     settings = []
@@ -83,7 +81,7 @@ def load_chat(path: str) -> Chat:
     return Chat(**data)
 
 
-def load_chats(path: str) -> List[Chat]:
+def load_chats(path: str) -> list[Chat]:
     pattern = os.path.join(path, "**", "*.json")
     paths = glob.glob(pattern, recursive=True)
     chats = []
@@ -93,32 +91,32 @@ def load_chats(path: str) -> List[Chat]:
     return chats
 
 
-def load_chats_from_cache(path: str) -> List[Chat]:
+def load_chats_from_cache(path: str) -> list[Chat]:
     path = os.path.join(path, "chats")
     os.makedirs(path, exist_ok=True)
     logger.info(f"Loading chats from cache at: {path}")
     return load_chats(path)
 
 
-def list_chat_ids(chats: List[Chat]) -> List[str]:
+def list_chat_ids(chats: list[Chat]) -> list[str]:
     return list(map(lambda x: x.id, chats))
 
 
-def find_chat_by_id(id: str, chats: List[Chat]) -> Optional[Chat]:
+def find_chat_by_id(id: str, chats: list[Chat]) -> Optional[Chat]:
     filtered = list(filter(lambda x: x.id == id, chats))
     if len(filtered) > 0:
         return filtered[0]
     return None
 
 
-def find_chat_index_by_id(id: str, chats: List[Chat]) -> int:
+def find_chat_index_by_id(id: str, chats: list[Chat]) -> int:
     for index, chat in enumerate(chats):
         if chat.id == id:
             return index
     return -1
 
 
-def set_chat_by_id(id: str, history: ChatHistory, chats: List[Chat]) -> None:
+def set_chat_by_id(id: str, history: ChatHistory, chats: list[Chat]) -> None:
     index = find_chat_index_by_id(id, chats)
     if index < 0:
         return
@@ -127,7 +125,7 @@ def set_chat_by_id(id: str, history: ChatHistory, chats: List[Chat]) -> None:
     chats[index] = chat
 
 
-def update_chat_by_id(id: str, chat: Chat, chats: List[Chat]) -> None:
+def update_chat_by_id(id: str, chat: Chat, chats: list[Chat]) -> None:
     index = find_chat_index_by_id(id, chats)
     if index < 0:
         return
@@ -135,7 +133,7 @@ def update_chat_by_id(id: str, chat: Chat, chats: List[Chat]) -> None:
     chats[index] = chat
 
 
-def del_chat_by_id(id: str, chats: List[Chat]) -> None:
+def del_chat_by_id(id: str, chats: list[Chat]) -> None:
     index = find_chat_index_by_id(id, chats)
     if index < 0:
         return
@@ -161,11 +159,11 @@ def empty_chat(id: Optional[str] = None, history: ChatHistory = []) -> Chat:
     return Chat(id=id, history=history)
 
 
-def list_setting_ids(settings: List[Setting]) -> List[str]:
+def list_setting_ids(settings: list[Setting]) -> list[str]:
     return list(map(lambda x: x.id, settings))
 
 
-def find_setting_by_id(id: str, settings: List[Setting]) -> Optional[Setting]:
+def find_setting_by_id(id: str, settings: list[Setting]) -> Optional[Setting]:
     filtered = list(filter(lambda x: x.id == id, settings))
     if len(filtered) > 0:
         return filtered[0]

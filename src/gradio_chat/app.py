@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Tuple
-
 import time
 import random
 import logging
@@ -21,8 +19,8 @@ import argparse
 
 import gradio as gr
 
-from frontend.models import ChatHistory, Update
-from frontend.utils import (
+from gradio_chat.models import ChatHistory, Update
+from gradio_chat.utils import (
     load_frontend_from_cache,
     load_chats_from_cache,
     load_settings,
@@ -52,7 +50,7 @@ def message_fn(
     message: str, 
     chat_history: ChatHistory, 
     setting_id: str
-) -> Tuple[str, ChatHistory]:
+) -> tuple[str, ChatHistory]:
     setting = find_setting_by_id(setting_id, settings)
     
     bot_message = random.choice(["How are you?", "I love you", "I'm very hungry"])
@@ -61,13 +59,13 @@ def message_fn(
     return "", chat_history
 
 
-def select_chat_event(choice: str, chat_id: str, chat_history: ChatHistory) -> Tuple[str, Update, Update]:
+def select_chat_event(choice: str, chat_id: str, chat_history: ChatHistory) -> tuple[str, Update, Update]:
     set_chat_by_id(chat_id, chat_history, chats)
     chat = find_chat_by_id(choice, chats)
     return chat.id, gr.update(value=chat.history), gr.update(value=chat.id)
 
 
-def add_chat_event(chat_id: str, chat_history: ChatHistory) -> Tuple[str, ChatHistory, Update]:
+def add_chat_event(chat_id: str, chat_history: ChatHistory) -> tuple[str, ChatHistory, Update]:
     set_chat_by_id(chat_id, chat_history, chats)
     chat = empty_chat()
     chats.append(chat)
@@ -75,7 +73,7 @@ def add_chat_event(chat_id: str, chat_history: ChatHistory) -> Tuple[str, ChatHi
     return chat.id, chat.history, gr.update(choices=choices, value=chat.id)
 
 
-def delete_chat_event(chat_id: str) -> Tuple[str, ChatHistory, Update]:
+def delete_chat_event(chat_id: str) -> tuple[str, ChatHistory, Update]:
     del_chat_by_id(chat_id, chats)
     if len(chats) == 0:
         logger.info("Creating empty chat because we deleted all chats")
@@ -95,7 +93,7 @@ def select_setting_event(choice: str) -> str:
     return choice
 
 
-def rename_chat_event(new_id: str, chat_id: str) -> Tuple[str, Update]:
+def rename_chat_event(new_id: str, chat_id: str) -> tuple[str, Update]:
     chat = find_chat_by_id(chat_id, chats)
     chat.id = new_id
     update_chat_by_id(chat_id, chat, chats)

@@ -14,23 +14,20 @@
 
 from typing import (
     Any,
-    Dict,
-    List,
-    Tuple,
     Optional
 )
 
 from dataclasses import dataclass
 
 Update = dict
-ChatHistory = List[Tuple[str, str]]
+ChatHistory = list[tuple[str, str]]
 
 
 @dataclass
 class Setting:
     id: str
     file: str
-    data: Dict[str, Any]
+    data: dict[str, Any]
 
 
 @dataclass
