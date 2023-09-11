@@ -36,6 +36,9 @@ from gradio_chat.utils import (
     find_setting_by_id
 )
 
+from prollm_translator.llm import openai_chat_completion
+from prollm_translator.prompts import base
+
 
 logger = logging.getLogger(__name__)
 
@@ -53,9 +56,25 @@ def message_fn(
 ) -> tuple[str, ChatHistory]:
     setting = find_setting_by_id(setting_id, settings)
     
-    bot_message = random.choice(["How are you?", "I love you", "I'm very hungry"])
+    source_lang_short = "en"
+    target_lang_short = "ja"
+    google_translation = "同意します"
+    system_prompt = base.prompt(
+        source_lang_short=source_lang_short,
+        target_lang_short=target_lang_short,
+        google_translation=google_translation
+    )
+
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": "How do I say 'I agree' very politely?"}
+    ]
+
+    bot_message, completion = openai_chat_completion(
+        messages,
+        return_chat_completion=True
+    )
     chat_history.append((message, bot_message))
-    time.sleep(2)
     return "", chat_history
 
 
@@ -105,13 +124,13 @@ def argument_parser() -> argparse.ArgumentParser():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--frontend",
-        default="src/frontend/configs/frontend/default.json",
+        default="src/gradio_chat/configs/frontend/default.json",
         type=str,
         help="The path to a frontend config file."
     )
     parser.add_argument(
         "--settings",
-        default="src/frontend/configs/settings",
+        default="src/gradio_chat/configs/settings",
         type=str,
         help="The path to a directory with settings files."
     )
