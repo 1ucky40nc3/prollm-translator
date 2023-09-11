@@ -1,0 +1,10 @@
+services:
+  gradio_chat:
+    build:
+      context: .
+    ports:
+      - "7860:7860"
+    volumes:
+      - .cache:/.cache
+    env_file:
+      - .env
