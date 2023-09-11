@@ -24,7 +24,7 @@ setup(
     long_description=open("README.md", "r", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     license="Apache 2.0 License",
-    url="https://github.com/1ucky40nc3/gradio_chat",
+    url="https://github.com/1ucky40nc3/prollm-translator",
     package_dir={"": "src"},
     packages=find_packages("src"),
 )
