@@ -13,8 +13,24 @@
 # limitations under the License.
 
 import datetime
+import iso639
 
 
 def timestamp() -> str:
     """Return a current timestamp."""
     return datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+
+
+def parse_iso639(lang: str) -> iso639.Language:
+    """Parse a ISO 639-1 string.
+    
+    Args:
+        lang: The language string.
+    
+    Returns:
+        A `iso639.Language` language object.
+
+    Raises:
+        iso639.LanguageNotFoundError: The string is not compliant with ISO 639-1.
+    """
+    return iso639.Language.match(lang)

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from prollm_translator.prompts import utils
+from prollm_translator import utils
 
 
 PROMPT = """You are the world's best translator (ever). Detailed instructions on your task will follow in a markdown format below.
