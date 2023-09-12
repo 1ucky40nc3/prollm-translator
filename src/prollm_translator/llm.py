@@ -45,8 +45,18 @@ def openai_chat_completion(
 
     Returns:
         The generated output message and optionally the `OpenAIObject`.
+
+    Raises:
+        ValueError: No OpenAI API-Key was provided.
     """
     openai_api_key = openai_api_key or os.getenv("OPENAI_API_KEY")
+    if openai_api_key is None:
+        raise ValueError(
+            "A OpenAI API-Key has to be provided in order to use the OpenAI chat completion endpoint!"
+        )
+    else:
+        # Set the OpenAI API-Key manually
+        openai.api_key = openai_api_key
 
     kwargs = dict(
         **kwargs,
