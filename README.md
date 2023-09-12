@@ -43,9 +43,19 @@ Insert your secrets and other configuration in the [`.env`](.env) file.
 
 ### Manual Usage
 
-You can start the gradio app manually with the following command:
+You can start the gradio app manually with the following commands:
 ```bash
-python src/frontend/main.py
+# Use the file
+python src/gradio_chat/app.py
+# Use the command
+gradio-chat
+```
+It is also possible to use the Pro-LLM Translator individually:
+```bash
+# Use the file
+python src/prollm_translator/main.py
+# Use the command
+prollm-translator
 ```
 
 ### Docker Compose
