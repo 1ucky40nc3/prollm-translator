@@ -22,6 +22,7 @@ import os
 import json
 import glob
 import logging
+import datetime
 from dataclasses import dataclass, asdict
 
 from haikunator import Haikunator
@@ -35,6 +36,11 @@ from gradio_chat.models import (
 
 
 logger = logging.getLogger(__name__)
+
+
+def timestamp() -> str:
+    """Return a current timestamp."""
+    return datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 
 
 def haikunate() -> str:
