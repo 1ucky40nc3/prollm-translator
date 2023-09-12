@@ -35,6 +35,11 @@ def local_path(path: str) -> str | None:
     
 
 def argument_parser() -> argparse.ArgumentParser():
+    """Implement an argument parser.
+    
+    Returns:
+        An argument parser for the gradio chat app.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--frontend",

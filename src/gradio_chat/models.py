@@ -20,11 +20,20 @@ from typing import (
 from dataclasses import dataclass
 
 Update = dict
-ChatHistory = list[tuple[str, str]]
+UserMessage = str
+BotMessage = str | None
+ChatHistory = list[tuple[UserMessage, BotMessage]]
 
 
 @dataclass
 class Setting:
+    """A settings object.
+    
+    Attrs:
+        id: The ID (name) of the setting.
+        file: A JSON file with the setting data.
+        data: The setting data.
+    """
     id: str
     file: str
     data: dict[str, Any]
@@ -32,11 +41,23 @@ class Setting:
 
 @dataclass
 class Frontend:
+    """A frontend object.
+
+    Attrs:
+        setting_id: The ID of the current setting.
+        chat_id: The ID of the current chat.
+    """
     setting_id: str
     chat_id: Optional[str]
 
 
 @dataclass
 class Chat:
+    """A chat object.
+    
+    Attrs:
+        id: A chat's ID (name).
+        history: The chat history.
+    """
     id: str
     history: ChatHistory

@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Generator
+
 import os
 import logging
 import argparse
@@ -50,13 +52,32 @@ chats = None
 settings = None
 
 
-def message_fn(
-    message: str, 
-    chat_history: ChatHistory, 
-    setting_id: str
-) -> tuple[str, ChatHistory]:
-    setting = find_setting_by_id(setting_id, settings)
+
+def user_fn(user_message: str, history: ChatHistory, setting_id: str) -> tuple[str, ChatHistory, str]:
+    """A user function for the chat streaming.
     
+    Args:
+        user_message: The new user message.
+        history: The current chat history.
+        setting_id: The ID of the current setting.
+
+    Returns:
+        A tuple of the new user message value, the chat history and the current setting ID.
+    """
+    history += [(user_message, None)]
+    return "", history, setting_id
+
+
+def bot_fn(history: ChatHistory, setting_id: str) -> Generator[ChatHistory, None, None]:
+    """A bot function with output streaming.
+
+    Args:
+        history: The current chat history.
+        setting_id: The current setting ID.
+
+    Returns:
+        A generator that yields the current chat history delta.
+    """
     source_lang_short = "en"
     target_lang_short = "ja"
     google_translation = "同意します"
@@ -66,31 +87,47 @@ def message_fn(
         google_translation=google_translation
     )
 
+    message = history[-1][0]
     messages = [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": message}
     ]
 
-    completion_iter = openai_chat_completion(
-        messages,
-        return_chat_completion=True
-    )
-    bot_message = []
-    for output, completion in completion_iter:
+    completion_iter = openai_chat_completion(messages)
+
+    history[-1][1] = ""
+    for output in completion_iter:
         if output is not None:
-            bot_message.append(output)
-    bot_message = "".join(bot_message)
-    chat_history.append((message, bot_message))
-    return "", chat_history
+            history[-1][1] += output
+        yield history
 
 
 def select_chat_event(choice: str, chat_id: str, chat_history: ChatHistory) -> tuple[str, Update, Update]:
+    """Change the selected chat.
+
+    Args:
+        choice: The ID of the chat we want to select.
+        chat_id: The current chat ID.
+        chat_history: The current chat history.
+
+    Returns:
+        A tuple with updates for the chat ID, the chatbot chat history and the chat renaming textbox.
+    """
     set_chat_by_id(chat_id, chat_history, chats)
     chat = find_chat_by_id(choice, chats)
     return chat.id, gr.update(value=chat.history), gr.update(value=chat.id)
 
 
 def add_chat_event(chat_id: str, chat_history: ChatHistory) -> tuple[str, ChatHistory, Update]:
+    """Add a new chat.
+    
+    Args:
+        chat_id: The ID of the current chat.
+        chat_history: The current chat history.
+
+    Returns:
+        A tuple with updates for the chat ID, the chatbot chat history and the chat selection.
+    """
     set_chat_by_id(chat_id, chat_history, chats)
     chat = empty_chat()
     chats.append(chat)
@@ -99,6 +136,14 @@ def add_chat_event(chat_id: str, chat_history: ChatHistory) -> tuple[str, ChatHi
 
 
 def delete_chat_event(chat_id: str) -> tuple[str, ChatHistory, Update]:
+    """Delete a chat.
+    
+    Args:
+        chat_id: The ID of the chat we want to delete.
+
+    Returns:
+        A tuple with updates for the chat ID, the chatbot chat history and the chat selection.
+    """
     del_chat_by_id(chat_id, chats)
     if len(chats) == 0:
         logger.info("Creating empty chat because we deleted all chats")
@@ -110,15 +155,33 @@ def delete_chat_event(chat_id: str) -> tuple[str, ChatHistory, Update]:
 
 
 def clear_chat_event() -> None:
+    """Clear the current chat."""
     return None
 
 
 def select_setting_event(choice: str) -> str:
+    """Change the current setting.
+    
+    Args:
+        choice: The ID of the new setting.
+
+    Returns:
+        An update to the setting state.
+    """
     print(f"Selected setting: {choice}")
     return choice
 
 
 def rename_chat_event(new_id: str, chat_id: str) -> tuple[str, Update]:
+    """Rename a chat.
+    
+    Args:
+        new_id: The new ID of the chat.
+        chat_id: The current ID of the chat.
+
+    Returns:
+        A tuple with updates for the chat ID state and the chat selection.
+    """
     chat = find_chat_by_id(chat_id, chats)
     chat.id = new_id
     update_chat_by_id(chat_id, chat, chats)
@@ -126,10 +189,12 @@ def rename_chat_event(new_id: str, chat_id: str) -> tuple[str, Update]:
     return chat.id, gr.update(choices=choices, value=chat.id)
 
 
-
-
-
 def app(args: argparse.Namespace) -> None:
+    """Implement the gradio chat app.
+    
+    Args:
+        args: Some parsed args from the argument parser.
+    """
     global chats
     global settings
 
@@ -234,7 +299,7 @@ def app(args: argparse.Namespace) -> None:
             ]
         )
         message_text_box.submit(
-            message_fn, 
+            user_fn, 
             inputs=[
                 message_text_box, 
                 chatbot,
@@ -242,8 +307,14 @@ def app(args: argparse.Namespace) -> None:
             ], 
             outputs=[
                 message_text_box, 
-                chatbot
-            ]
+                chatbot,
+                setting_id_state
+            ], 
+            queue=False
+        ).then(
+            bot_fn, 
+            [chatbot, setting_id_state], 
+            chatbot
         )
         select_setting_radio.change(
             select_setting_event,
@@ -262,6 +333,7 @@ def app(args: argparse.Namespace) -> None:
             ]
         )
 
+    demo.queue()
     demo.launch(
         share=args.share, 
         server_name=args.server_name,
