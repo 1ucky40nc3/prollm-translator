@@ -161,3 +161,6 @@ cython_debug/
 
 # Local cache
 .cache/
+
+# Hide the local logs
+.logs/
