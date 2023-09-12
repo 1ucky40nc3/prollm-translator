@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import time
-import random
+import os
 import logging
 import argparse
 
@@ -21,6 +20,7 @@ import gradio as gr
 
 from gradio_chat.models import ChatHistory, Update
 from gradio_chat.utils import (
+    timestamp,
     load_frontend_from_cache,
     load_chats_from_cache,
     load_settings,
@@ -35,6 +35,7 @@ from gradio_chat.utils import (
     list_setting_ids,
     find_setting_by_id
 )
+from gradio_chat.parser import argument_parser
 
 from prollm_translator.llm import openai_chat_completion
 from prollm_translator.prompts import base
@@ -67,7 +68,7 @@ def message_fn(
 
     messages = [
         {"role": "system", "content": system_prompt},
-        {"role": "user", "content": "How do I say 'I agree' very politely?"}
+        {"role": "user", "content": message}
     ]
 
     bot_message, completion = openai_chat_completion(
@@ -120,46 +121,7 @@ def rename_chat_event(new_id: str, chat_id: str) -> tuple[str, Update]:
     return chat.id, gr.update(choices=choices, value=chat.id)
 
 
-def argument_parser() -> argparse.ArgumentParser():
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--frontend",
-        default="src/gradio_chat/configs/frontend/default.json",
-        type=str,
-        help="The path to a frontend config file."
-    )
-    parser.add_argument(
-        "--settings",
-        default="src/gradio_chat/configs/settings",
-        type=str,
-        help="The path to a directory with settings files."
-    )
-    parser.add_argument(
-        "--cache",
-        default=".cache",
-        type=str,
-        help="The path to the cache directory."
-    )
-    parser.add_argument(
-        "--share",
-        action="store_true",
-        default=False,
-        help="State if you want to share the gradio app."
-    )
-    parser.add_argument(
-        "--server_name",
-        default="127.0.0.1",
-        type=str,
-        help="The host address of the local gradio server."
-    )
-    parser.add_argument(
-        "--server_port",
-        default=7860,
-        type=int,
-        help="The port of our local gradio server."
-    )
 
-    return parser
 
 
 def app(args: argparse.Namespace) -> None:
@@ -305,15 +267,44 @@ def app(args: argparse.Namespace) -> None:
 def main() -> None:
     parser = argument_parser()
     args = parser.parse_args()
+
+    # Set up the logging
+    os.makedirs(args.log_dir, exist_ok=True)
+    logs_filename = os.path.join(args.log_dir, f"{timestamp()}.log")
+    logs_format = "%(asctime)s | %(levelname)s | %(message)s"
+    logs_encoding = "utf-8"
+    logging.basicConfig(
+        format=logs_format,
+        encoding=logs_encoding,
+        level=logging.INFO,
+        handlers=[
+            logging.FileHandler(logs_filename),
+            logging.StreamHandler()
+        ],
+    )
+
+    logger = logging.getLogger(__name__)
+    logger.info(f"Writing logs to file: {logs_filename}")
+
+    # Logging config
     logger.info(f"Starting frontend with args:\n{pprint_dict(vars(args))}")
+
+    if args.local:
+        # Set up the local environment
+        from dotenv import load_dotenv
+        load_dotenv()
+        logger.info("Loaded local environment variables with dotenv!")
 
     app(args)
 
 
 if __name__ == '__main__':
+    # Set the logging config
     logging.basicConfig(
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         level=logging.INFO
     )
+    # Update the logger
+    logger = logging.getLogger(__name__)
 
     main()
