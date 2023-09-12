@@ -80,7 +80,7 @@ def argument_parser() -> argparse.ArgumentParser():
     )
     parser.add_argument(
         "--env_file",
-        default=None,
+        default=".env",
         type=local_path,
         help="The path if an environment variables file.",
     )
