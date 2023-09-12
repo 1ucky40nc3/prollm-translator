@@ -52,7 +52,7 @@ def openai_chat_completion(
     openai_api_key = openai_api_key or os.getenv("OPENAI_API_KEY")
     if openai_api_key is None:
         raise ValueError(
-            "A OpenAI API-Key has to be provided in order to use the OpenAI chat completion endpoint!"
+            "An OpenAI API-Key has to be provided in order to use the OpenAI chat completion endpoint!"
         )
     else:
         # Set the OpenAI API-Key manually
@@ -66,7 +66,7 @@ def openai_chat_completion(
         function_call=function_call,
         user=user
     )
-    # Filter out `None` values - We don't send them to the chat completion API
+    # Filter out `None` key-value-pairs - We don't send them to the chat completion endpoint
     kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
     completion = openai.ChatCompletion.create(**kwargs)
