@@ -292,19 +292,11 @@ def main() -> None:
     if args.local:
         # Set up the local environment
         from dotenv import load_dotenv
-        load_dotenv()
-        logger.info("Loaded local environment variables with dotenv!")
+        load_dotenv(args.env_file)
+        logger.info(f"Loaded local environment variables with dotenv from: {args.env_file}")
 
     app(args)
 
 
 if __name__ == '__main__':
-    # Set the logging config
-    logging.basicConfig(
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        level=logging.INFO
-    )
-    # Update the logger
-    logger = logging.getLogger(__name__)
-
     main()
