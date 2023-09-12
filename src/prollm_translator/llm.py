@@ -12,8 +12,71 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Any, Generator
+
 import os
+from dataclasses import dataclass
+
 import openai
+
+
+@dataclass
+class OpenAiChatCompletionChunkChoiceDelta:
+    """A OpenAI chat completion chunk choice delta object.
+
+    Attrs:
+        content: The content of the delta object.
+        role: The role of the chunk content creator.
+    """
+    content: str | None = None
+    role: str | None = None
+
+@dataclass
+class OpenAiChatCompletionChunkChoice:
+    """A OpenAI chat completion chunk choice object.
+
+    Attrs:
+        index: The index of the choice.
+        delta: The chunk object delta.
+    """
+    index: int
+    delta: OpenAiChatCompletionChunkChoiceDelta
+    finish_reason: str | None
+
+
+    def __post_init__(self) -> None:
+        # Cast the delta
+        if not isinstance(self.delta, OpenAiChatCompletionChunkChoiceDelta):
+            self.delta = OpenAiChatCompletionChunkChoiceDelta(**self.delta)
+
+
+@dataclass
+class OpenAiChatCompletionChunk:
+    """A OpenAI chat completion chunk object.
+
+    Attrs:
+        id: The ID of the chat completion chunk
+        object: The type of the chat completion object.
+        created: A timetamp (unix epoch time) of the chat completion object creation.
+        model: The OpenAI chat completion model ID.
+        choices: A list of chat completion choices of this chunk.
+        finish_reason: The finish reason of the chat completion endpoint.
+    """
+    id: str
+    object: str
+    created: int
+    model: str
+    choices: list[OpenAiChatCompletionChunkChoice]
+
+    def __post_init__(self) -> None:
+        # Cast the choices
+        for i, choice in enumerate(self.choices):
+            if not isinstance(choice, OpenAiChatCompletionChunkChoice):
+                self.choices[i] = OpenAiChatCompletionChunkChoice(**choice)
+
+    def get_output(self) -> str:
+        return self.choices[0].delta.content
+
 
 
 def openai_chat_completion(
@@ -25,7 +88,7 @@ def openai_chat_completion(
     return_chat_completion: bool = False, 
     openai_api_key: str | None = None, 
     **kwargs
-) -> str | tuple[str, openai.openai_object.OpenAIObject]:
+) -> Generator[str | tuple[str, OpenAiChatCompletionChunk], None, None]:
     """Generate a OpenAI chat completion.
 
     Note:
@@ -44,7 +107,7 @@ def openai_chat_completion(
             This can also be provided through the 'OPENAI_API_KEY' environment variable.
 
     Returns:
-        The generated output message and optionally the `OpenAIObject`.
+        A generator that returns the output chunks or tuples of output chunks and chunk objects.
 
     Raises:
         ValueError: No OpenAI API-Key was provided.
@@ -64,14 +127,18 @@ def openai_chat_completion(
         messages=messages,
         functions=functions,
         function_call=function_call,
-        user=user
+        user=user,
+        stream=True
     )
     # Filter out `None` key-value-pairs - We don't send them to the chat completion endpoint
     kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
     completion = openai.ChatCompletion.create(**kwargs)
-    output = completion.choices[0].message.content
 
-    if return_chat_completion:
-        return output, completion
-    return output
+    for chunk in completion:
+        chunk = OpenAiChatCompletionChunk(**chunk)
+        output = chunk.get_output()
+        if return_chat_completion:
+            yield output, chunk
+        else:
+            yield output

@@ -71,10 +71,15 @@ def message_fn(
         {"role": "user", "content": message}
     ]
 
-    bot_message, completion = openai_chat_completion(
+    completion_iter = openai_chat_completion(
         messages,
         return_chat_completion=True
     )
+    bot_message = []
+    for output, completion in completion_iter:
+        if output is not None:
+            bot_message.append(output)
+    bot_message = "".join(bot_message)
     chat_history.append((message, bot_message))
     return "", chat_history
 
