@@ -53,7 +53,10 @@ def main() -> None:
     if args.local:
         # Set up the local environment
         from dotenv import load_dotenv
-        load_dotenv()
+        if load_dotenv(args.env_file, verbose=True):
+            logger.info(
+                f"Loaded local environment variables with dotenv from: {args.env_file}"
+            )
 
 
 if __name__ == "__main__":
