@@ -128,11 +128,11 @@ def app(args: argparse.Namespace) -> None:
     global chats
     global settings
 
-    frontend = load_frontend_from_cache(args.frontend, args.cache)
+    frontend = load_frontend_from_cache(args.frontend, args.cache_dir)
     logger.info(f"Loaded frontend config:\n{pprint_dcls(frontend)}")
     settings = load_settings(args.settings)
     logger.info(f"Loaded a total of {len(settings)} settings")
-    chats = load_chats_from_cache(args.cache)
+    chats = load_chats_from_cache(args.cache_dir)
     logger.info(f"Loaded a total of {len(chats)} chats")
 
     if len(chats) == 0:

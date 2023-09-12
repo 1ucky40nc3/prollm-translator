@@ -49,7 +49,7 @@ def argument_parser() -> argparse.ArgumentParser():
         help="The path to a directory with settings files."
     )
     parser.add_argument(
-        "--cache",
+        "--cache_dir",
         default=".cache",
         type=str,
         help="The path to the cache directory."
@@ -86,7 +86,7 @@ def argument_parser() -> argparse.ArgumentParser():
     )
     parser.add_argument(
         "--log_dir",
-        default="logs",
+        default=".logs",
         type=str,
         help="The path to the logging directory.",
     )

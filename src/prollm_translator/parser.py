@@ -42,14 +42,12 @@ def argument_parser() -> argparse.ArgumentParser:
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-l",
         "--local",
         action="store_true",
         default=False,
         help="Whether this is a local dev environment or not.",
     )
     parser.add_argument(
-        "-e",
         "--env_file",
         default=".env",
         type=local_path,
@@ -57,7 +55,7 @@ def argument_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--log_dir",
-        default="logs",
+        default=".logs",
         type=str,
         help="The path to the logging directory.",
     )
