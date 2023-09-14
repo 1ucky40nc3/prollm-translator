@@ -65,3 +65,56 @@ You can also use the gradio app with the provided docker compose setup. Just fol
 docker compose build
 docker compose up
 ```
+
+## Terraform
+
+We provide a terraform configuration for a Prompt-LLM Translator in GCP.
+
+You will need to install the following dependencies:
+- gcloud CLI
+- Terraform Community Edition
+
+### Create a GCP Compute Instance Deployment
+
+1. Load your GCP application credentials
+```bash
+gcloud auth application-default login
+```
+2. Set the correct GCP project
+```bash
+gcloud config set project prollm-translator
+```
+3. [Create a GCP service account key](https://cloud.google.com/iam/docs/keys-create-delete) (see [Terraform tutorial](https://developer.hashicorp.com/terraform/tutorials/gcp-get-started/google-cloud-platform-build#:~:text=A%20GCP%20service%20account%20key%3A%20Create%20a%20service%20account%20key)) and save it the `terraform/key.json` path
+4. Generate a new SSH key for this deployment (Note: Remember to safely store your new passphrase!)
+```bash
+ssh-keygen -f .ssh/id_rsa -N INSERT_YOUR_PASSPHRASE_HERE
+```
+5. Initialize the Terraform working directory
+```bash
+# cd terraform
+terraform init
+```
+6. Generates a speculative Terraform execution plan
+```bash
+# cd terraform
+terraform plan -out tfplan
+```
+7. Create or update infrastructure according to Terraform configuration
+```bash
+# cd terraform
+terraform apply "tfplan"
+```
+8. Describe your deployed GCP Compute Instance VM
+```bash
+gcloud compute instances describe prollm-translator --zone ZONE
+```
+9. Find the external IP adress of your GCP Compute Instance VM in the description under `networkInterfaces[0].accessConfigs[0].natIP`
+10. SSH into your GCP Compute Instance VM
+```bash
+ssh -i .ssh/id_rsa USERNAME@EXTERNAL_IP
+```
+11. Destroy Terraform-managed infrastructure
+```bash
+# cd terraform
+terraform destroy
+```
