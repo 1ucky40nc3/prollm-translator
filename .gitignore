@@ -194,6 +194,9 @@ override.tf.json
 .terraformrc
 terraform.rc
 
+# Hide the terraform lock file
+.terraform.lock.hcl
+
 # Ignore the tfplan
 tfplan
 
