@@ -66,7 +66,88 @@ docker compose build
 docker compose up
 ```
 
-## Terraform
+### GCP Deployment
+
+#### GCP Artifact Registry
+
+## Manually upload Docker Images (w/ CLI)
+
+1. Provide Docker with priviledged access to interact with registries (follow the [tutorial](../../windows/powershell/README.md))
+2. Log out and log back in (let group membership changes to take effect)
+3. Load your GCP application credentials
+```bash
+gcloud auth application-default login
+```
+2. Set the correct GCP project
+```bash
+gcloud config set project prollm-translator
+```
+4. Create a new Docker artifact repository
+```bash
+# Command:
+gcloud artifacts repositories create REPOSITORY_NAME \
+    --repository-format=docker \
+    --location=REGION \
+    --description=DESCRIPTION
+
+# Example:
+gcloud artifacts repositories create prollm-translator \
+    --repository-format=docker \
+    --location=us-central1 \
+    --description="Docker repository"
+```
+1. Verify the artifact repository creation
+```bash
+gcloud artifacts repositories list
+```
+1. Configure authentification
+```bash
+# Command: 
+gcloud auth configure-docker REGION-docker.pkg.dev
+
+# Example:
+gcloud auth configure-docker us-central1-docker.pkg.dev
+```
+1. Build a Docker image
+```bash
+docker build -t prollm-translator .
+```
+1. Tag the Docker image with the artifact repository name
+```bash
+# Command:
+docker tag prollm-translato \
+    REGION-docker.pkg.dev/PROJECT/REPOSITORY_NAME/IMAGE_NAME:TAG
+
+# Example:
+docker tag prollm-translator \
+    us-central1-docker.pkg.dev/prollm-translator/prollm-translator/prollm-translator:0.0.1
+```
+8. Push the image to the artifact registry
+```bash
+# Command:
+docker push REGION-docker.pkg.dev/PROJECT/REPOSITORY_NAME/IMAGE_NAME:TAG
+
+# Example:
+docker push us-central1-docker.pkg.dev/prollm-translator/prollm-translator/prollm-translator:0.0.1
+```
+9. Pull the Docker image from the artifact registry
+```bash
+# Command:
+docker pull REGION-docker.pkg.dev/PROJECT/REPOSITORY_NAME/IMAGE_NAME:TAG
+
+# Example:
+docker pull us-central1-docker.pkg.dev/prollm-translator/prollm-translator/prollm-translator:0.0.1
+```
+10. Delete the artifact repository
+```bash
+# Command:
+gcloud artifacts repositories delete REPOSITORY_NAME --location=REGION
+
+# Example:
+gcloud artifacts repositories delete prollm-translator --location=us-central1
+```
+
+#### Terraform
 
 We provide a terraform configuration for a Prompt-LLM Translator in GCP.
 
@@ -74,7 +155,7 @@ You will need to install the following dependencies:
 - gcloud CLI
 - Terraform Community Edition
 
-### Create a GCP Compute Instance Deployment
+##### Create a GCP Compute Instance Deployment
 
 1. Load your GCP application credentials
 ```bash
