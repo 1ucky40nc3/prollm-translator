@@ -89,31 +89,32 @@ gcloud config set project prollm-translator
 ```bash
 ssh-keygen -f .ssh/id_rsa -N INSERT_YOUR_PASSPHRASE_HERE
 ```
-5. Initialize the Terraform working directory
+5. Update your SSH username in the [`.env`](.env) file
+6. Initialize the Terraform working directory
 ```bash
 # cd terraform
 terraform init
 ```
-6. Generates a speculative Terraform execution plan
+7. Generates a speculative Terraform execution plan
 ```bash
 # cd terraform
 terraform plan -out tfplan
 ```
-7. Create or update infrastructure according to Terraform configuration
+8. Create or update infrastructure according to Terraform configuration
 ```bash
 # cd terraform
 terraform apply "tfplan"
 ```
-8. Describe your deployed GCP Compute Instance VM
+9. Describe your deployed GCP Compute Instance VM
 ```bash
 gcloud compute instances describe prollm-translator --zone ZONE
 ```
-9. Find the external IP adress of your GCP Compute Instance VM in the description under `networkInterfaces[0].accessConfigs[0].natIP`
-10. SSH into your GCP Compute Instance VM
+10. Find the external IP adress of your GCP Compute Instance VM in the description under `networkInterfaces[0].accessConfigs[0].natIP`
+11. SSH into your GCP Compute Instance VM
 ```bash
 ssh -i .ssh/id_rsa USERNAME@EXTERNAL_IP
 ```
-11. Destroy Terraform-managed infrastructure
+12. Destroy Terraform-managed infrastructure
 ```bash
 # cd terraform
 terraform destroy
