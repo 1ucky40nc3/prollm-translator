@@ -1,6 +1,11 @@
 # This code is compatible with Terraform 4.25.0 and versions that are backwards compatible to 4.25.0.
 # For information about validating this Terraform code, see https://developer.hashicorp.com/terraform/tutorials/gcp-get-started/google-cloud-platform-build#format-and-validate-the-configuration
 
+# Local enviroment variables from a `.env` file at the root dir
+locals {
+  envs = { for tuple in regexall("(.*)=(.*)", file("../.env")) : tuple[0] => sensitive(tuple[1]) }
+}
+
 terraform {
   required_providers {
     google = {
@@ -47,7 +52,7 @@ resource "google_compute_instance" "prollm-translator" {
   metadata = {
     enable-osconfig = "TRUE"
     # Add a manually generated SSH key
-    ssh-keys = "${var.ssh_username}:${file("../.ssh/id_rsa.pub")}"
+    ssh-keys = "${local.envs["SSH_USERNAME"]}:${file("../.ssh/id_rsa.pub")}"
   }
 
   name = var.google_compute_instance_name

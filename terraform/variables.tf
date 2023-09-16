@@ -27,15 +27,3 @@ variable "google_compute_instance_image" {
   type        = string
   default     = "projects/debian-cloud/global/images/debian-11-bullseye-v20230912"
 }
-
-variable "ssh_key_user" {
-  description = "The user of the manually generated SSH key"
-  type        = string
-  default     = "louis"
-}
-
-variable "ssh_username" {
-  description = "The username of the manually generated SSH key"
-  type        = string
-  default     = "louis"
-}
